@@ -98,3 +98,51 @@ app.post("/api/register", async (req, res) => {
     if (connection) connection.release();
   }
 });
+
+app.post("/api/admin/register", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email dan password dibutuhkan" });
+  }
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const sql = "INSERT INTO admins (email, password) VALUES (?, ?)";
+    await pool.query(sql, [email, hashedPassword]);
+    res.status(201).json({ message: "Admin berhasil dibuat" });
+  } catch (error) {
+    if (error.code === "ER_DUP_ENTRY") {
+      res.status(409).json({ error: "Email admin sudah ada." });
+    } else {
+      console.error("Error buat admin:", error);
+      res.status(500).json({ error: "Gagal membuat admin" });
+    }
+  }
+});
+
+app.post("/api/admin/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email dan password dibutuhkan" });
+  }
+  try {
+    const sql = "SELECT * FROM admins WHERE email = ?";
+    const [adminRows] = await pool.query(sql, [email]);
+    if (adminRows.length === 0) {
+      return res.status(401).json({ error: "Email atau password salah" });
+    }
+    const admin = adminRows[0];
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Email atau password salah" });
+    }
+    const token = jwt.sign(
+      { id: admin.id, email: admin.email, role: "admin" },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    res.json({ message: "Login berhasil", token: token });
+  } catch (error) {
+    console.error("Error login admin:", error);
+    res.status(500).json({ error: "Gagal login" });
+  }
+});
