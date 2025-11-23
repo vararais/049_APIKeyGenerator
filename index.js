@@ -231,3 +231,36 @@ app.delete("/api/admin/apikey/:id", authenticateAdmin, async (req, res) => {
     res.status(500).json({ error: "Gagal menghapus API key" });
   }
 });
+
+app.post("/validate-apikey", async (req, res) => {
+  try {
+    const { apiKeyToValidate } = req.body;
+    if (!apiKeyToValidate) {
+      return res.status(400).json({ error: "API key dibutuhkan" });
+    }
+    const sql = `
+        SELECT COUNT(*) as count 
+        FROM api_keys 
+        WHERE api_key = ? 
+          AND status = 'active' 
+          AND expires_at > NOW()`;
+    const [rows] = await pool.query(sql, [apiKeyToValidate]);
+    const count = rows[0].count;
+    if (count > 0) {
+      res.json({ valid: true, message: "API Key sudah Valid" });
+    } else {
+      res.status(401).json({
+        valid: false,
+        message: "API Key Tidak Valid, Diblokir, atau Kedaluwarsa",
+      });
+    }
+  } catch (error) {
+    console.error("Error saat validasi key:", error);
+    res.status(500).json({ error: "Gagal memvalidasi key" });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server berjalan di http://localhost:${PORT}`);
+  console.log(`Terhubung ke database MySQL '${process.env.DB_NAME}'`);
+});
