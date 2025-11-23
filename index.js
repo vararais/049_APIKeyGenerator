@@ -163,3 +163,71 @@ const authenticateAdmin = (req, res, next) => {
     next();
   });
 };
+
+app.get("/api/admin/users", authenticateAdmin, async (req, res) => {
+  try {
+    const [users] = await pool.query(
+      "SELECT id, firstname, lastname, email, start_date, last_date FROM users_apikey ORDER BY created_at DESC"
+    );
+
+    const [keys] = await pool.query(
+      "SELECT id, api_key, user_id, status FROM api_keys"
+    );
+
+    const usersWithKeys = users.map((user) => {
+      const userKeyIds = keys
+        .filter((key) => key.user_id === user.id)
+        .map((key) => key.id);
+      return {
+        ...user,
+        api_key_ids: userKeyIds,
+      };
+    });
+
+    res.json(usersWithKeys);
+  } catch (error) {
+    console.error("Error get users:", error);
+    res.status(500).json({ error: "Gagal mengambil data user" });
+  }
+});
+
+app.get("/api/admin/apikeys", authenticateAdmin, async (req, res) => {
+  try {
+    const sql = `
+            SELECT 
+                k.id, 
+                k.api_key, 
+                k.status, 
+                k.created_at,
+                k.expires_at, 
+                u.id as user_id, 
+                u.email as user_email
+            FROM api_keys k
+            LEFT JOIN users_apikey u ON k.user_id = u.id
+            ORDER BY k.created_at DESC
+        `;
+    const [keys] = await pool.query(sql);
+    res.json(keys);
+  } catch (error) {
+    console.error("Error get apikeys:", error);
+    res.status(500).json({ error: "Gagal mengambil data API key" });
+  }
+});
+
+app.delete("/api/admin/apikey/:id", authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const sql = "DELETE FROM api_keys WHERE id = ?";
+    const [result] = await pool.query(sql, [id]);
+    if (result.affectedRows > 0) {
+      res.json({ message: `API Key dengan ID ${id} berhasil dihapus` });
+    } else {
+      res
+        .status(404)
+        .json({ error: `API Key dengan ID ${id} tidak ditemukan` });
+    }
+  } catch (error) {
+    console.error("Error delete apikey:", error);
+    res.status(500).json({ error: "Gagal menghapus API key" });
+  }
+});
