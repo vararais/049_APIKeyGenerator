@@ -146,3 +146,20 @@ app.post("/api/admin/login", async (req, res) => {
     res.status(500).json({ error: "Gagal login" });
   }
 });
+
+const authenticateAdmin = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) {
+    return res
+      .status(401)
+      .json({ error: "Token tidak ada, otorisasi ditolak" });
+  }
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Token tidak valid" });
+    }
+    req.user = user;
+    next();
+  });
+};
