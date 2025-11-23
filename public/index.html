@@ -1,224 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-R" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>// SYS: API KEY GENERATOR //</title>
+    <title>API Key Manager</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
-        --color-bg: #f8fafc;
-        --color-surface: #ffffff;
-        --color-primary: #8b5cf6;
-        --color-primary-light: #a78bfa;
-        --color-primary-dark: #7c3aed;
-        --color-text: #334155;
-        --color-text-light: #64748b;
-        --color-border: #e2e8f0;
-        --color-success: #10b981;
-        --color-danger: #ef4444;
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --primary: #6366f1; /* Indigo */
+        --primary-hover: #4f46e5;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --border: #e5e7eb;
+        --success: #10b981;
+        --danger: #ef4444;
       }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
-        background-color: var(--color-bg);
-        color: var(--color-text);
+        background-color: var(--bg-color);
+        color: var(--text-main);
         font-family: "Inter", sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
         margin: 0;
-        padding: 40px 20px;
+        padding: 20px;
       }
+
       .container {
-        background-color: var(--color-surface);
-        padding: 40px;
-        border-radius: 12px;
-        box-shadow: var(--shadow-lg);
-        width: 90%;
-        max-width: 600px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      }
-      .container::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
+        background-color: var(--card-bg);
+        padding: 48px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05),
+          0 8px 10px -6px rgba(0, 0, 0, 0.01);
         width: 100%;
-        height: 4px;
-        background: linear-gradient(
-          90deg,
-          var(--color-primary),
-          var(--color-primary-light)
-        );
+        max-width: 550px;
+        text-align: center;
       }
+
       h1 {
-        font-weight: 600;
-        color: var(--color-primary-dark);
-        font-size: 1.75rem;
-        margin-top: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
         margin-bottom: 8px;
+        letter-spacing: -0.025em;
       }
-      h2 {
-        font-weight: 500;
-        color: var(--color-text);
-        border-bottom: 1px solid var(--color-border);
-        padding-bottom: 8px;
-        margin-top: 0;
-      }
-      p {
-        color: var(--color-text-light);
-        margin-top: 0;
-        margin-bottom: 32px;
+
+      p.subtitle {
+        color: var(--text-muted);
         font-size: 0.95rem;
-      }
-      .button-group {
-        display: flex;
-        gap: 16px;
-        justify-content: center;
+        margin-top: 0;
         margin-bottom: 32px;
       }
-      button {
-        font-family: "Inter", sans-serif;
-        font-size: 0.9rem;
-        font-weight: 500;
-        border-radius: 8px;
-        padding: 12px 24px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        background: var(--color-primary);
-        color: white;
-        border: none;
+
+      /* Key Generator Section */
+      .key-display {
+        background: #111827;
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 24px;
+        border: 1px solid #374151;
         position: relative;
-        overflow: hidden;
-        box-shadow: var(--shadow-sm);
       }
-      button:disabled {
-        background-color: #cbd5e1;
-        color: #94a3b8;
-        cursor: not-allowed;
-      }
-      button:hover:not(:disabled) {
-        background: var(--color-primary-dark);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-      }
+
       textarea {
         width: 100%;
-        height: 100px;
-        background-color: #f8fafc;
-        color: var(--color-text);
+        height: 80px;
+        background-color: transparent;
+        color: #e5e7eb;
         font-family: "JetBrains Mono", monospace;
         font-size: 0.9rem;
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
+        border: none;
         padding: 16px;
-        box-sizing: border-box;
         resize: none;
+        outline: none;
+        text-align: center;
       }
-      .status-message {
-        height: 20px;
-        margin-top: 12px;
+
+      textarea::placeholder {
+        color: #4b5563;
+      }
+
+      .action-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+
+      .btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--primary-hover);
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background-color: white;
+        border: 1px solid var(--border);
+        color: var(--text-main);
+      }
+      .btn-secondary:hover {
+        background-color: #f9fafb;
+        border-color: #d1d5db;
+      }
+
+      .btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      /* Form Section */
+      .form-section {
+        text-align: left;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-group label {
+        display: block;
         font-size: 0.85rem;
-        color: var(--color-success);
+        font-weight: 500;
+        color: var(--text-main);
+        margin-bottom: 6px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s;
+        outline: none;
+      }
+
+      .form-group input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .btn-success {
+        width: 100%;
+        background-color: var(--success);
+        color: white;
+        margin-top: 8px;
+      }
+      .btn-success:hover:not(:disabled) {
+        background-color: #059669;
+      }
+
+      .status-message {
+        margin-top: 16px;
+        min-height: 24px;
+        font-size: 0.85rem;
+        font-weight: 500;
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.3s;
       }
       .status-message.show {
         opacity: 1;
       }
-      .form-group {
-        text-align: left;
-        margin-bottom: 16px;
+
+      .footer-link {
+        margin-top: 32px;
+        border-top: 1px solid var(--border);
+        padding-top: 24px;
       }
-      .form-group label {
-        display: block;
-        font-weight: 500;
-        font-size: 0.875rem;
-        margin-bottom: 6px;
-        color: var(--color-text-light);
-      }
-      .form-group input[type="text"],
-      .form-group input[type="email"],
-      .form-group input[type="password"] {
-        width: 100%;
-        padding: 12px 16px;
-        font-size: 0.9rem;
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        box-sizing: border-box;
-        transition: all 0.3s ease;
-      }
-      .form-group input:focus {
-        outline: none;
-        border-color: var(--color-primary-light);
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-      }
-      hr {
+      
+      .btn-text {
+        color: var(--text-muted);
+        background: none;
         border: none;
-        border-top: 1px solid var(--color-border);
-        margin: 32px 0;
+        font-size: 0.85rem;
+        text-decoration: underline;
+        cursor: pointer;
       }
-      a {
-        color: var(--color-primary);
-        text-decoration: none;
-        font-weight: 500;
-      }
-      .text-center {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 0.9rem;
+      .btn-text:hover {
+        color: var(--primary);
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>API Key Generator & User</h1>
+      <h1>Developer API Access</h1>
+      <p class="subtitle">Generate your unique key to access our services.</p>
 
-      <div class="button-group">
-        <button id="generateBtn">Generate Key</button>
-        <button id="copyBtn">Copy to Clipboard</button>
-      </div>
-      <textarea
-        id="apiKeyArea"
-        placeholder="API key akan muncul di sini..."
-        readonly
-      ></textarea>
-
-      <div class="form-group" style="margin-top: 24px">
-        <label for="firstname">First Name</label>
-        <input type="text" id="firstname" placeholder="John" />
-      </div>
-      <div class="form-group">
-        <label for="lastname">Last Name</label>
-        <input type="text" id="lastname" placeholder="Doe" />
-      </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="john.doe@example.com" />
+      <div class="key-display">
+        <textarea
+          id="apiKeyArea"
+          placeholder="// Click Generate to create a key..."
+          readonly
+        ></textarea>
       </div>
 
-      <button id="saveBtn" style="width: 100%; background: #10b981">
-        2. Save User & Link Key
-      </button>
+      <div class="action-row">
+        <button id="generateBtn" class="btn btn-primary">1. Generate Key</button>
+        <button id="copyBtn" class="btn btn-secondary">Copy</button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-group">
+          <label for="firstname">First Name</label>
+          <input type="text" id="firstname" placeholder="e.g. John" />
+        </div>
+        <div class="form-group">
+          <label for="lastname">Last Name</label>
+          <input type="text" id="lastname" placeholder="e.g. Doe" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="john@company.com" />
+        </div>
+
+        <button id="saveBtn" class="btn btn-success">
+          2. Register User & Link Key
+        </button>
+      </div>
 
       <div class="status-message" id="statusMessage"></div>
 
-      <hr />
-      <a href="/admin.html" style="text-decoration: none">
-        <button style="width: 100%; background: #334155">Admin Panel</button>
-      </a>
+      <div class="footer-link">
+        <a href="/admin.html">
+          <button class="btn-text">Go to Admin Dashboard &rarr;</button>
+        </a>
+      </div>
     </div>
 
     <script>
@@ -234,8 +266,8 @@
       function showStatus(message, isError = false) {
         statusMessage.textContent = message;
         statusMessage.style.color = isError
-          ? "#ef4444"
-          : "var(--color-success)";
+          ? "var(--danger)"
+          : "var(--success)";
         statusMessage.classList.add("show");
       }
 
@@ -250,7 +282,7 @@
           .then((data) => {
             if (data.apiKey) {
               apiKeyArea.value = data.apiKey;
-              showStatus("API key generated! Isi data di bawah.");
+              showStatus("API key generated! Please fill details below.");
             } else {
               throw new Error(data.error || "Unknown error");
             }
@@ -272,10 +304,11 @@
           return;
         }
         navigator.clipboard.writeText(apiKeyArea.value).then(() => {
+          const originalText = copyBtn.textContent;
           copyBtn.textContent = "Copied!";
-          showStatus("API key copied!");
+          showStatus("API key copied to clipboard");
           setTimeout(() => {
-            copyBtn.textContent = "Copy to Clipboard";
+            copyBtn.textContent = originalText;
             statusMessage.classList.remove("show");
           }, 2000);
         });
@@ -289,12 +322,12 @@
         const apiKey = apiKeyArea.value;
 
         if (!firstname || !lastname || !email || !apiKey) {
-          showStatus("Tolong isi semua data dan generate API key.", true);
+          showStatus("Please fill all fields and generate an API key.", true);
           return;
         }
 
         saveBtn.disabled = true;
-        saveBtn.textContent = "Saving...";
+        saveBtn.textContent = "Processing...";
 
         fetch("/api/register", {
           method: "POST",
@@ -306,12 +339,12 @@
           .then(async (res) => {
             const data = await res.json();
             if (!res.ok) {
-              throw new Error(data.error || "Registrasi gagal");
+              throw new Error(data.error || "Registration failed");
             }
             return data;
           })
           .then((data) => {
-            showStatus("Sukses! User dibuat dan key terhubung.");
+            showStatus("Success! User registered and key linked.");
             firstnameInput.value = "";
             lastnameInput.value = "";
             emailInput.value = "";
@@ -322,7 +355,7 @@
           })
           .finally(() => {
             saveBtn.disabled = false;
-            saveBtn.textContent = "2. Save User & Link Key";
+            saveBtn.textContent = "2. Register User & Link Key";
           });
       });
     </script>
