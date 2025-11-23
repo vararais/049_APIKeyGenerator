@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>// ADMIN: DASHBOARD //</title>
+    <style>
+      :root {
+        --color-bg: #f8fafc;
+        --color-surface: #ffffff;
+        --color-primary: #8b5cf6;
+        --color-primary-light: #a78bfa;
+        --color-primary-dark: #7c3aed;
+        --color-text: #334155;
+        --color-text-light: #64748b;
+        --color-border: #e2e8f0;
+        --color-success: #10b981;
+        --color-danger: #ef4444;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      body {
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+      }
+      .dashboard-container {
+        background-color: var(--color-surface);
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: var(--shadow-lg);
+        width: 90%;
+        max-width: 1200px;
+        margin: 40px auto;
+        text-align: left;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 20px;
+      }
+      .header h1 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--color-primary-dark);
+        font-size: 1.75rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 0.9rem;
+      }
+      th, td {
+        border: 1px solid var(--color-border);
+        padding: 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #f8fafc;
+        font-weight: 600;
+      }
+      tbody tr:nth-child(even) {
+        background-color: #fcfcfd;
+      }
+      button {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border-radius: 8px;
+        padding: 12px 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--color-primary);
+        color: white;
+        border: none;
+      }
+      #logoutBtn {
+        background: var(--color-danger);
+        font-weight: 600;
+      }
+      #logoutBtn:hover {
+        background: #dc2626;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <div class="header">
+        <h1>Admin Dashboard</h1>
+        <button id="logoutBtn">Logout</button>
+      </div>
+
+      <h2 style="margin-top: 40px">User List</h2>
+      <div style="overflow-x: auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Start Date</th>
+              <th>API Key IDs</th>
+            </tr>
+          </thead>
+          <tbody id="user-list"></tbody>
+        </table>
+      </div>
+
+      <h2 style="margin-top: 40px">API Key List</h2>
+      <div style="overflow-x: auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>API Key</th>
+              <th>Status</th>
+              <th>User ID</th>
+              <th>User Email</th>
+              <th>Expires At</th>
+            </tr>
+          </thead>
+          <tbody id="apikey-list"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const token = localStorage.getItem("adminToken");
+      const userListBody = document.getElementById("user-list");
+      const apiKeyListBody = document.getElementById("apikey-list");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("adminToken");
+        window.location.href = "/admin.html";
+      });
+
+      if (!token) {
+        alert("Anda harus login terlebih dahulu!");
+        window.location.href = "/admin.html";
+      } else {
+        fetchData();
+      }
+
+      async function fetchData() {
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        };
+
+        try {
+          const [userRes, keyRes] = await Promise.all([
+            fetch("/api/admin/users", { headers: headers }),
+            fetch("/api/admin/apikeys", { headers: headers }),
+          ]);
+
+          if (userRes.status === 401 || userRes.status === 403) {
+            throw new Error("Sesi Anda telah habis. Silakan login kembali.");
+          }
+
+          const users = await userRes.json();
+          const keys = await keyRes.json();
+
+          renderUsers(users);
+          renderApiKeys(keys);
+        } catch (error) {
+          alert(error.message);
+          localStorage.removeItem("adminToken");
+          window.location.href = "/admin.html";
+        }
+      }
+
+      function renderUsers(users) {
+        userListBody.innerHTML = "";
+        if (users.length === 0) {
+          userListBody.innerHTML = '<tr><td colspan="6">Tidak ada data user.</td></tr>';
+          return;
+        }
+
+        users.forEach((user) => {
+          const row = `
+            <tr>
+              <td>${user.id}</td>
+              <td>${user.firstname}</td>
+              <td>${user.lastname}</td>
+              <td>${user.email}</td>
+              <td>${user.start_date ? user.start_date.split("T")[0] : "N/A"}</td>
+              <td>${user.api_key_ids.length > 0 ? user.api_key_ids.join(", ") : "None"}</td>
+            </tr>
+          `;
+          userListBody.innerHTML += row;
+        });
+      }
+
+      function renderApiKeys(keys) {
+        apiKeyListBody.innerHTML = "";
+        if (keys.length === 0) {
+          apiKeyListBody.innerHTML = '<tr><td colspan="6">Tidak ada data API key.</td></tr>';
+          return;
+        }
+
+        keys.forEach((key) => {
+          const row = `
+            <tr>
+              <td>${key.id}</td>
+              <td>${key.api_key}</td>
+              <td>${key.status}</td>
+              <td>${key.user_id || "N/A"}</td>
+              <td>${key.user_email || "N/A"}</td>
+              <td>${key.expires_at ? key.expires_at.split("T")[0] : "N/A"}</td>
+            </tr>
+          `;
+          apiKeyListBody.innerHTML += row;
+        });
+      }
+    </script>
+  </body>
+</html>
